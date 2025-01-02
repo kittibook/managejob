@@ -27,9 +27,8 @@ export default function Managereduceticket() {
       );
       console.log(res.data); // ตรวจสอบข้อมูลที่ได้จาก API
       if (res.data.status == 200) {
-        setInfo(res.data.profile);
       } else {
-        navigate("/");
+        navigate("/admin");
       }
     } catch (error) {
       console.error(

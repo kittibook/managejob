@@ -84,7 +84,7 @@ export default function Manageaddtype() {
             if (res.data.status == 200) {
               Swal.fire("สำเร็จ!", "ข้อมูลได้ถูกบันทึกเรียบร้อย.", "success");
               // fetchData()
-              navigate("/");
+              navigate("/admin");
             } else {
               Swal.fire("ล้มเหลว!", "ข้อมูลล้มเหลว", "error");
             }

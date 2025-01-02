@@ -27,10 +27,10 @@ export default function ManageUser() {
         {}, // body (ถ้าไม่มีให้เว้นว่างเป็น {})
         Configurl.headers()
       );
-      console.log(res.data); // ตรวจสอบข้อมูลที่ได้จาก API
+      // console.log(res.data); // ตรวจสอบข้อมูลที่ได้จาก API
       if (res.data.status == 200) {
       } else {
-        navigate("/");
+        navigate("/admin");
       }
     } catch (error) {
       console.error(
@@ -44,13 +44,18 @@ export default function ManageUser() {
   const fetchData = async () => {
     try {
       const res = await axios.post(
-        Configurl.Url +  "/user",
+        Configurl.Url + "/user",
         { userid: Number(id) } // body (ถ้าไม่มีให้เว้นว่างเป็น {})
       );
       if (res.data.status == 200) {
         const user = res.data.user;
         // console.log(user); // ตรวจสอบข้อมูล user ที่ได้รับ
-        setUser(user);
+        if (user) {
+          setUser(user);
+          setname(user.username);
+          setjob(user.job)
+          settype(user.type)
+        }
       }
     } catch (error) {
       console.error(
@@ -64,7 +69,6 @@ export default function ManageUser() {
     navigate("/manage?id=" + id);
   };
 
-
   const handleSubmit = () => {
     Swal.fire({
       title: "ยืนยันการบันทึกข้อมูล?",
@@ -75,9 +79,27 @@ export default function ManageUser() {
       cancelButtonText: "ยกเลิก",
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        Swal.fire("สำเร็จ!", "ข้อมูลได้ถูกบันทึกเรียบร้อย.", "success");
+        // Swal.fire("สำเร็จ!", "ข้อมูลได้ถูกบันทึกเรียบร้อย.", "success");
+        try {
+            const res = await axios.post(
+              Configurl.Url + "/updateuser",
+              { userid: Number(id), name : name, job : job, type : Number(type)} // body (ถ้าไม่มีให้เว้นว่างเป็น {})
+            );
+            console.log(res.data)
+            if (res.data.status == 200) {
+              Swal.fire("สำเร็จ!", "ข้อมูลได้ถูกบันทึกเรียบร้อย.", "success");
+              fetchData();
+            } else {
+              Swal.fire("ล้มเหลว!", "ข้อมูลล้มเหลว", "error");
+            }
+        } catch (error) {
+          console.error(
+            "Error data:",
+            error.response ? error.response.data : error.message
+          );
+        }
       }
     });
   };
@@ -93,13 +115,20 @@ export default function ManageUser() {
       <main className="w-full flex-grow flex items-center justify-center px-4 md:px-8 py-6">
         <div className="w-full max-w-lg bg-black/40 rounded-lg p-6 shadow-lg">
           <div className="mb-6">
-            <p className="text-2xl font-bold text-white">{User && User.username ? User.username : "กำลังค้นหาข้อมูล..."}</p>
-            <p className="text-lg text-gray-300">งาน : {User && User.job ? User.job : "กำลังค้นหาข้อมูล..."}</p>
+            <p className="text-2xl font-bold text-white">
+              {User && User.username ? User.username : "กำลังค้นหาข้อมูล..."}
+            </p>
+            <p className="text-lg text-gray-300">
+              งาน : {User && User.job ? User.job : "กำลังค้นหาข้อมูล..."}
+            </p>
             <p className="text-2xl font-semibold mt-2 text-white">
-              ยอดเงินสุทธิ : <span className="text-green-400">{User && User.Salary && User.Salary.length > 0
-                    ? `${User.Salary[0].salary}` // เข้าถึงค่า salary ของตัวแรกใน Array
-                    : "กำลังค้นหาข้อมูล..."}
-                  .00</span>
+              ยอดเงินสุทธิ :{" "}
+              <span className="text-green-400">
+                {User && User.Salary && User.Salary.length > 0
+                  ? `${User.Salary[0].salary}` // เข้าถึงค่า salary ของตัวแรกใน Array
+                  : "กำลังค้นหาข้อมูล..."}
+                .00
+              </span>
             </p>
           </div>
 
@@ -109,6 +138,8 @@ export default function ManageUser() {
                 ชื่อ
               </label>
               <input
+                value={name}
+                onChange={(e) => setname(e.target.value)}
                 type="text"
                 placeholder="กรอกชื่อ"
                 className="w-full p-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400"
@@ -120,6 +151,8 @@ export default function ManageUser() {
                 งาน
               </label>
               <input
+              value={job}
+              onChange={(e) => setjob(e.target.value)}
                 type="text"
                 placeholder="กรอกงาน"
                 className="w-full p-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400"
@@ -128,24 +161,15 @@ export default function ManageUser() {
 
             <div>
               <label className="block text-lg font-medium text-white mb-1">
-                เงินเดือน/ตั๋ว
-              </label>
-              <input
-                type="text"
-                placeholder="กรอกเงินเดือน/ตั๋ว"
-                className="w-full p-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-lg font-medium text-white mb-1">
                 ประเภทเงินเดือน
               </label>
-              <input
-                type="text"
-                placeholder="กรอกประเภทเงินเดือน"
-                className="w-full p-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
+              <select value={type} onChange={e => settype(e.target.value)} className="select select-bordered w-full h-20 text-xl bg-gray-700 rounded hover:bg-gray-600">
+                <option disabled selected>
+                ประเภทเงินเดือน
+                </option>
+                <option value="0">เงินเดือน</option>
+                <option value="1">ตั๋ว</option>
+              </select>
             </div>
           </div>
 

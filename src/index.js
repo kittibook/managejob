@@ -17,9 +17,13 @@ import Manageaddtype from './Admin/Manage/ManageAddtype';
 import Managereduceticket from './Admin/Manage/ManagereduceTicket';
 import Manageticket from './Admin/Manage/ManageTicket';
 import ManageUser from './Admin/Manage/Manageuser';
+import HistoryUser from './Admin/Manage/Historyuser';
+import HistoryUserAll from './Admin/Manage/Historyuserall';
+import HomeUser from './user/Homeuser';
+import HistoryUserr from './user/Historyuserrr';
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/admin",
     element: <Home />,
   },
   {
@@ -65,7 +69,23 @@ const router = createBrowserRouter([
   {
     path: "/manageaddtype",
     element: <Manageaddtype />,
-  }
+  },
+  {
+    path: "/managehistory",
+    element: <HistoryUser />,
+  },
+  {
+    path: "/managehistoryall",
+    element: <HistoryUserAll />,
+  },
+  {
+    path: "/user",
+    element: <HomeUser />,
+  },
+  {
+    path: "/userhistory",
+    element: <HistoryUserr />,
+  },
 ])
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

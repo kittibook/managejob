@@ -34,7 +34,13 @@ export default function Login() {
           icon: "success",
           confirmButtonText: "ตกลง",
         }).then(() => {
-          navigate("/"); 
+          if(response.data.success){
+          navigate("/admin"); 
+
+          } else {
+            navigate("/user"); 
+
+          }
         });
       } else {
         Swal.fire({

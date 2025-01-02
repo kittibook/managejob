@@ -12,9 +12,11 @@ export default function ManageHome() {
   const navigate = useNavigate();
   const [User, setUser] = useState();
   const [type, settype] = useState();
+  const [das, setdas] = useState();
   useEffect(() => {
     fetchData(); // เรียกใช้งานฟังก์ชัน
     fetchInfo();
+    fetchDatadas();
   }, []); // [] เพื่อรันเพียงครั้งเดียวหลัง mount
 
   // ฟังก์ชัน async สำหรับคำขอ API
@@ -52,12 +54,65 @@ export default function ManageHome() {
         setUser(user);
       }
     } catch (error) {
-      console.error(
-        "Error fetching data:",
-        error.response ? error.response.data : error.message
-      );
+      
     }
   };
+
+  const fetchDatadas = async () => {
+    try {
+      const res = await axios.post(
+        Configurl.Url + "/getdas",
+        { userid: Number(id) } // body (ถ้าไม่มีให้เว้นว่างเป็น {})
+      );
+      // console.log(res.data.history); // ตรวจสอบข้อมูลที่ได้จาก API
+      if (res.data.status == 200) {
+        setdas(res.data.history)
+        // const user = res.data.user;
+        // console.log(user); // ตรวจสอบข้อมูล user ที่ได้รับ
+        // settype(user.type);
+        // setUser(user);
+      }
+    } catch (error) {
+      
+    }
+  };
+
+  const deluser  = async () => {
+    Swal.fire({
+      title: "ยืนยันการเบิกเงินเดือน?",
+      text: "กรุณายืนยันการเบิกเงินเดือน",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+            const res = await axios.post(
+              Configurl.Url + "/deluser",
+              { userid: Number(id)} // body (ถ้าไม่มีให้เว้นว่างเป็น {})
+            );
+            // console.log(res.data)
+            if (res.data.status == 200) {
+              Swal.fire("สำเร็จ!", "ข้อมูลได้ถูกบันทึกเรียบร้อย.", "success");
+              fetchData();
+              navigate("/admin")
+            } else {
+              Swal.fire("ล้มเหลว!", "ข้อมูลล้มเหลว", "error");
+            }
+          
+        } catch (error) {
+          console.error(
+            "Error data:",
+            error.response ? error.response.data : error.message
+          );
+        }
+        // Swal.fire("สำเร็จ!", "ข้อมูลได้ถูกบันทึกเรียบร้อย.", "success");
+      }
+    });
+  }
 
 
 
@@ -99,7 +154,7 @@ export default function ManageHome() {
                 <span className="text-green-400">
                   {User && User.Salary && User.Salary.length > 0
                     ? `${User.Salary[0].salary}` // เข้าถึงค่า salary ของตัวแรกใน Array
-                    : "กำลังค้นหาข้อมูล..."}
+                    : "0"}
                   .00
                 </span>
               </p>
@@ -139,13 +194,13 @@ export default function ManageHome() {
             <button  onClick={e => navigate('/managereducesalary?id='+ id)} className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition font-medium">
               เบิกเงิน
             </button>
-            <button className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition font-medium">
+            <button  onClick={e => navigate('/managehistory?id='+ id)} className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition font-medium">
               ประวัติเบิกเงิน
             </button>
             <button onClick={e => navigate('/manageuser?id='+ id)} className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition font-medium">
               แก้ไข
             </button>
-            <button className="px-4 py-2 bg-red-600 rounded hover:bg-red-500 transition font-medium">
+            <button onClick={deluser} className="px-4 py-2 bg-red-600 rounded hover:bg-red-500 transition font-medium">
               ลบ
             </button>
           </section>
@@ -153,21 +208,27 @@ export default function ManageHome() {
           <section className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-gray-800 p-5 rounded-lg shadow-md flex flex-col items-center">
               <p className="text-sm md:text-lg font-medium">เงินเดือน</p>
-              <p className="text-lg md:text-2xl font-bold">200,000.00</p>
+              <p className="text-lg md:text-2xl font-bold">{User && User.Salary && User.Salary.length > 0
+                    ? `${User.Salary[0].salary}` // เข้าถึงค่า salary ของตัวแรกใน Array
+                    : "0"}
+                  .00</p>
             </div>
             <div className="bg-gray-800 p-5 rounded-lg shadow-md flex flex-col items-center">
               <p className="text-sm md:text-lg font-medium">เบิกเงิน</p>
-              <p className="text-lg md:text-2xl font-bold">30,000.00</p>
+              <p className="text-lg md:text-2xl font-bold">{das}.00</p>
             </div>
-            <div className="bg-gray-800 p-5 rounded-lg shadow-md flex flex-col items-center">
+            {/* <div className="bg-gray-800 p-5 rounded-lg shadow-md flex flex-col items-center">
               <p className="text-sm md:text-lg font-medium">
                 เงินเดือนหลังเบิก
               </p>
               <p className="text-lg md:text-2xl font-bold">170,000.00</p>
-            </div>
+            </div> */}
             <div className="bg-gray-800 p-5 rounded-lg shadow-md flex flex-col items-center">
               <p className="text-sm md:text-lg font-medium">ตั๋ว</p>
-              <p className="text-lg md:text-2xl font-bold">20</p>
+              <p className="text-lg md:text-2xl font-bold">{User && User.Salary && User.Salary.length > 0
+                    ? `${User.Salary[0].ticket}` // เข้าถึงค่า salary ของตัวแรกใน Array
+                    : "0"}
+                  .00</p>
             </div>
           </section>
         </div>

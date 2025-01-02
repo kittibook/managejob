@@ -28,7 +28,7 @@ export default function Managewithdraw() {
       console.log(res.data); // ตรวจสอบข้อมูลที่ได้จาก API
       if (res.data.status == 200) {
       } else {
-        navigate("/");
+        navigate("/admin")
       }
     } catch (error) {
       console.error(
